@@ -55,7 +55,7 @@ let isJumping = false;
 let isCrouching = false;
 let enSuelo = false;
 const jumpStrength = 0.45;
-const gravity = -0.020;
+const gravity = -0.030;
 const fastDropStrength = -0.9   ;
 const laneCooldown = 150;
 let targetX = railXPositions[currentRail];
@@ -583,6 +583,7 @@ function checkGroundCollision() {
 
 
 function update() {
+    if (pauseGame) return;
     stats.update();
     cameraControls.update();
     const delta = clock.getDelta();
@@ -738,8 +739,8 @@ function update() {
                 setTimeout(() => puedePerderVida = true, cooldownPerderVida * 1000);
 
                 if (vidas <= 0) {
-                    vidas = 3;
-                    puntos = 0;
+                    mostrarGameOver();
+                    return;
                 }
             }
         }
@@ -773,11 +774,53 @@ function generarVagonesPeriodicamente(delta) {
     }
 }
 
-// function render() {
-//     requestAnimationFrame(render);
-//     update();
-//     renderer.render(scene, camera);
-// }
+function mostrarGameOver() {
+    const gameOver = document.getElementById("gameOverScreen");
+    const score = document.getElementById("finalScore");
+    score.textContent = Math.floor(puntos);
+    gameOver.style.display = "flex";
+    pauseGame = true;
+}
+
+function ocultarGameOver() {
+    const gameOver = document.getElementById("gameOverScreen");
+    gameOver.style.display = "none";
+    pauseGame = false;
+    reiniciarJuego();
+}
+
+document.getElementById("restartBtn").addEventListener("click", ocultarGameOver);
+
+let pauseGame = false;
+
+function reiniciarJuego() {
+    // Reinicia variables principales
+    vidas = 3;
+    puntos = 0;
+    p_pos.set(railXPositions[1], playerHeight / 2, -50);
+    velocity.set(0, 0, 0);
+    enSuelo = true;
+    isJumping = false;
+    isCrouching = false;
+    currentRail = 1;
+    targetX = railXPositions[currentRail];
+    
+    // Elimina obstáculos y vagones
+    obstaculos.forEach(o => scene.remove(o.mesh));
+    obstaculos = [];
+    vagones.forEach(v => scene.remove(v));
+    vagones = [];
+    collidables = collidables.filter(obj => !obj.userData?.isObstacle && !obj.userData?.isVagon);
+
+    // HUD
+    hudData.Vidas = vidas;
+    hudData.Puntos = 0;
+
+    // Reinicia animación a "run"
+    if (mixer && actions[animationNames[A_RUN]]) {
+        changeAnimation(A_RUN);
+    }
+}
 
 function render(now) {
     requestAnimationFrame(render);

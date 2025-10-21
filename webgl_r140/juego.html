@@ -12,6 +12,7 @@
 			}
 		</style>
 	</head>
+	
 	<body>
 		<!-- Contenedor del app -->
 		<div id="container"></div>
@@ -26,7 +27,38 @@
 		<script src="lib/dat.gui.min.js"></script>
 		<script src="lib/stats.min.js"></script>
 		<script src="lib/dat.gui.min.js"></script>
-		<script src="js/juego.js"></script>
+		
 
+		<div id="gameOverScreen" style="
+			display: none;
+			position: fixed;
+			top: 0; left: 0;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(0, 0, 0, 0.85);
+			color: white;
+			font-family: sans-serif;
+			font-size: 2em;
+			text-align: center;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+			z-index: 9999;
+		">
+			<div>HAS MUERTO, ADIÓS</div>
+			<div style="margin-top: 20px; font-size: 0.8em;">Puntuación final: <span id="finalScore">0</span></div>
+			<button id="restartBtn" style="
+				margin-top: 30px;
+				padding: 10px 20px;
+				font-size: 1em;
+				background-color: #2196f3;
+				color: white;
+				border: none;
+				border-radius: 8px;
+				cursor: pointer;
+				transition: 0.2s;
+			">Reintentar</button>
+		</div>
+		<script src="js/juego.js"></script>
 	</body>
 </html>
