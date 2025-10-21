@@ -1,4 +1,7 @@
-// Juego refactorizado sin CANNON.js - Solo raycasting
+
+let lastFrameTime = 0;
+const fps = 30;                // <-- límite de FPS deseado
+const frameDuration = 1000 / fps;  // duración por frame en milisegundos (≈33.33ms para 30fps)
 
 var loader;
 var renderer, scene, camera;
@@ -770,11 +773,26 @@ function generarVagonesPeriodicamente(delta) {
     }
 }
 
-function render() {
+// function render() {
+//     requestAnimationFrame(render);
+//     update();
+//     renderer.render(scene, camera);
+// }
+
+function render(now) {
     requestAnimationFrame(render);
+
+    if (!lastFrameTime) lastFrameTime = now;
+    const deltaMs = now - lastFrameTime;
+
+    if (deltaMs < frameDuration) return; // aún no toca renderizar el siguiente frame
+
+    lastFrameTime = now - (deltaMs % frameDuration); // sincroniza para evitar deriva temporal
+
     update();
     renderer.render(scene, camera);
 }
+
 
 init();
 render();
