@@ -1,3 +1,8 @@
+// --- Textura loader global ---
+const textureLoader = new THREE.TextureLoader();
+const texvagon = textureLoader.load('./texturas/vagon.jpg');
+const texobstaculo = textureLoader.load('./texturas/obstaculo.png');
+
 
 let lastFrameTime = 0;
 const fps = 30;                // <-- límite de FPS deseado
@@ -221,7 +226,15 @@ function generarObstaculo(scene) {
     if (tipo === "suelo") {
         const altoSuelo = 1;
         const geo = new THREE.BoxGeometry(1, altoSuelo, 1);
-        const mat = new THREE.MeshStandardMaterial({ color: 0xff6600 });
+        //const mat = new THREE.MeshStandardMaterial({ color: 0xff6600 });
+        texobstaculo.repeat.set(1, 1);
+
+        const mat = new THREE.MeshStandardMaterial({
+            map: texobstaculo,
+            metalness: 0.9,
+            roughness: 0.45
+        });
+
         mesh = new THREE.Mesh(geo, mat);
         const rail = railXPositions[Math.floor(Math.random() * 3)];
         mesh.position.set(rail, altoSuelo / 2 + vagonAlto/2, -naveLength / 2 - 150);
@@ -256,11 +269,13 @@ function generarVagon(scene) {
     const posZ = -naveLength / 2 - Math.random() * 20 - 10;
 
     const geo = new THREE.BoxGeometry(vagonAncho, vagonAlto, vagonLargo);
+    
+    texvagon.repeat.set(1, 1);
+
     const mat = new THREE.MeshStandardMaterial({
-        color: 0x888888,
-        metalness: 0.8,
-        roughness: 0.25,
-        emissive: 0
+        map: texvagon,
+        metalness: 0.9,
+        roughness: 0.45
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(railX, vagonAlto / 2, posZ - 80);
@@ -275,13 +290,19 @@ function generarVagon(scene) {
 
 function crearEscenario(scene) {
     // Skybox
-    const skyGeo = new THREE.SphereGeometry(300, 64, 64);
+    const skyTex = textureLoader.load('./texturas/fondoestrellas1.jpeg');
+    skyTex.wrapS = THREE.RepeatWrapping;
+    skyTex.wrapT = THREE.RepeatWrapping;
+    skyTex.repeat.set(4, 4);
+
+    const skyGeo = new THREE.SphereGeometry(150, 16, 16);
     const skyMat = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load('./texturas/fondoestrellas1.jpeg'),
+        map: skyTex,
         side: THREE.BackSide
     });
     const sky = new THREE.Mesh(skyGeo, skyMat);
     scene.add(sky);
+
 
     // Raíles flotantes
     const railWidth = 1.5;
@@ -289,12 +310,13 @@ function crearEscenario(scene) {
     const railLength = 200;
     const spacing = 2.5;
 
+   const railtex = textureLoader.load('./texturas/rail.png');
+    railtex.repeat.set(1, 5);
+
     const materialRail = new THREE.MeshStandardMaterial({
-        color: 0x3366ff,
-        metalness: 0.7,
-        roughness: 0.2,
-        emissive: 0x2244ff,
-        emissiveIntensity: 0.4
+        map: railtex,
+        metalness: 0.9,
+        roughness: 0.45
     });
 
     const railPositions = [-spacing, 0, spacing];
@@ -314,26 +336,36 @@ function crearEscenario(scene) {
 
     // Estructura nave
     const naveGeo = new THREE.BoxGeometry(naveWidth, naveHeight, naveLength);
+    const navetex = textureLoader.load('./texturas/parednave3.jpg');
+    navetex.wrapS = THREE.RepeatWrapping;
+    navetex.wrapT = THREE.RepeatWrapping;
+    navetex.repeat.set(4, 8);
+
     const naveMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        metalness: 0.8,
-        roughness: 0.3,
+        map: navetex,
+        metalness: 0.6,
+        roughness: 0.45
     });
     const nave = new THREE.Mesh(naveGeo, naveMat);
     nave.position.set(8, 0, -naveLength / 2);
     scene.add(nave);
 
     // Ventanas
-    const windowGeo = new THREE.BoxGeometry(0.2, 0.5, 0.5);
+    const windowGeo = new THREE.BoxGeometry(0.2, 5, 5);
+    const tex = textureLoader.load('./texturas/ventanas.png');
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1);
+
     const windowMat = new THREE.MeshStandardMaterial({
-        color: 0x00ffff,
-        emissive: 0x00ffff,
-        emissiveIntensity: 0,
-        metalness: 0.1,
-        roughness: 0.1
+        map: tex,
+        metalness: 0.9,
+        roughness: 0.45,
+        emissive: 0xffffff,   // color de emisión (blanco para que la textura brille)
+        emissiveIntensity: 0.1
     });
 
-    const rows = 30;
+    const rows = 3;
     const cols = 60;
     const step = naveLength / cols * 1.5;
     const naveX = 8;
@@ -347,7 +379,7 @@ function crearEscenario(scene) {
             const z = naveZ + c * step - 150;
             const x = naveX - naveWidth / 2 - 0.20;
             win.position.set(x, y, z);
-            scene.add(win);
+            //scene.add(win);
             ventanas.push(win);
         }
     }
