@@ -1,12 +1,11 @@
-// --- Textura loader global ---
 const textureLoader = new THREE.TextureLoader();
 const texvagon = textureLoader.load('./texturas/vagon.jpg');
 const texobstaculo = textureLoader.load('./texturas/obstaculo.png');
 
 
 let lastFrameTime = 0;
-const fps = 30;                // <-- límite de FPS deseado
-const frameDuration = 1000 / fps;  // duración por frame en milisegundos (≈33.33ms para 30fps)
+const fps = 30;
+const frameDuration = 1000 / fps;
 
 var loader;
 var renderer, scene, camera;
@@ -16,7 +15,7 @@ var mixer = null;
 const clock = new THREE.Clock();
 var player;
 
-// Posición y física manual del jugador
+// pos jugador
 var speed = 0.1;
 var p_pos = new THREE.Vector3(0, 0, 0);
 var velocity = new THREE.Vector3(0, 0, 0);
@@ -29,19 +28,17 @@ let velocidadVentanas = 20;
 let vagones = [];
 let velocidadVagones = 25;
 const railXPositions = [-2.5, 0, 2.5];
-
-// Obstáculos
-let obstaculos = [];
-let tiempoProximoObstaculo = 0;
-
-// Cámara
-let cameraMode = "third";
-const cameraOffset = new THREE.Vector3(0, 3, 6);
-
-// Configuración de los vagones
 const vagonAncho = 1.5;
 const vagonAlto = 3.0;
 const vagonLargo = 10.0;
+
+// Obstaculos
+let obstaculos = [];
+let tiempoProximoObstaculo = 0;
+
+// Camara
+let cameraMode = "third";
+const cameraOffset = new THREE.Vector3(0, 3, 6);
 
 // Nave
 let naveWidth = 6;
@@ -87,15 +84,14 @@ const stats = new Stats();
 stats.showPanel(0); // FPS inicialmente. Picar para cambiar panel.
 document.getElementById( 'container' ).appendChild( stats.domElement );
 
-// --- HUD / Puntuación ---
 let vidas = 3;
 let puntos = 0;
-// --- Colisiones frontales ---
+
+// vidas cooldown
 let puedePerderVida = true;
 const cooldownPerderVida = 3.0; // segundos
 let tiempoUltimaColision = -Infinity;
 
-// dat.GUI
 let gui;
 let hudFolder;
 let hudData = {
@@ -176,14 +172,13 @@ document.addEventListener('keydown', (event) => {
             //     }
             // }
             // break;
-            if (isCrouching) break; // evita reiniciar animación si ya está agachado
+            if (isCrouching) break;
 
             isCrouching = true;
             isJumping = false;
             velocity.y = enSuelo ? 0 : fastDropStrength;
             changeAnimation(A_CROUCH);
 
-            // Asegura que se levante en máximo 1 segundo
             setTimeout(() => {
                 if (isCrouching) {
                     isCrouching = false;
@@ -199,8 +194,6 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// init();
-// render();
 
 class Obstaculo {
     constructor(mesh, tipo) {
@@ -255,8 +248,8 @@ function generarObstaculo(scene) {
     }
 
     mesh.userData.isObstacle = true;
-    mesh.castShadow = true;    // proyecta sombra
-    //mesh.receiveShadow = true; // recibe sombra
+    mesh.castShadow = true;   
+    //mesh.receiveShadow = true;
 
     scene.add(mesh);
     collidables.push(mesh);
@@ -280,8 +273,8 @@ function generarVagon(scene) {
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(railX, vagonAlto / 2, posZ - 80);
     mesh.userData.isVagon = true;
-    mesh.castShadow = true;    // proyecta sombra
-    //mesh.receiveShadow = true; // recibe sombra
+    mesh.castShadow = true;    
+    //mesh.receiveShadow = true;
 
     scene.add(mesh);
     collidables.push(mesh);
@@ -304,7 +297,7 @@ function crearEscenario(scene) {
     scene.add(sky);
 
 
-    // Raíles flotantes
+    // railes
     const railWidth = 1.5;
     const railHeight = 0.2;
     const railLength = 200;
@@ -334,7 +327,7 @@ function crearEscenario(scene) {
         collidables.push(rail);
     });
 
-    // Estructura nave
+    // nave
     const naveGeo = new THREE.BoxGeometry(naveWidth, naveHeight, naveLength);
     const navetex = textureLoader.load('./texturas/parednave3.jpg');
     navetex.wrapS = THREE.RepeatWrapping;
@@ -351,7 +344,7 @@ function crearEscenario(scene) {
     scene.add(nave);
 
     // Ventanas
-    const windowGeo = new THREE.BoxGeometry(0.2, 5, 5);
+   /*  const windowGeo = new THREE.BoxGeometry(0.2, 5, 5);
     const tex = textureLoader.load('./texturas/ventanas.png');
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
@@ -361,7 +354,7 @@ function crearEscenario(scene) {
         map: tex,
         metalness: 0.9,
         roughness: 0.45,
-        emissive: 0xffffff,   // color de emisión (blanco para que la textura brille)
+        emissive: 0xffffff,
         emissiveIntensity: 0.1
     });
 
@@ -379,27 +372,24 @@ function crearEscenario(scene) {
             const z = naveZ + c * step - 150;
             const x = naveX - naveWidth / 2 - 0.20;
             win.position.set(x, y, z);
-            //scene.add(win);
+            scene.add(win);
             ventanas.push(win);
         }
-    }
+    } */
 
     // Luces
     const ambient = new THREE.AmbientLight(0x99aaff, 1);
     scene.add(ambient);
 
-    // === Una luz fija por carril donde está el jugador ===
-    const luzColor = 0x99ccff; // azul suave
+    const luzColor = 0x99ccff;
     const luzIntensidad = 1.5;
     const luzDistancia = 10;
 
     railXPositions.forEach(x => {
         const light = new THREE.PointLight(luzColor, luzIntensidad, luzDistancia, 2);
-        // Posición: misma Z que el jugador, altura sobre el suelo
         light.position.set(x, 2.5, p_pos.z);
         scene.add(light);
 
-        // Pequeña esfera visible para la luz
         const bulb = new THREE.Mesh(
             new THREE.SphereGeometry(0.15, 12, 12),
             new THREE.MeshBasicMaterial({ color: luzColor })
@@ -408,7 +398,7 @@ function crearEscenario(scene) {
     });
 
 
-    // === Sol visible en el cielo ===
+    // sol
     const sunGeo = new THREE.SphereGeometry(30, 64, 64);
     const sunMat = new THREE.MeshBasicMaterial({
         color: 0xffee99,
@@ -416,10 +406,9 @@ function crearEscenario(scene) {
         emissiveIntensity: 1.5
     });
     const sun = new THREE.Mesh(sunGeo, sunMat);
-    sun.position.set(0, 150, -200); // arriba y al fondo
+    sun.position.set(0, 150, -200);
     scene.add(sun);
 
-    // Luz direccional del sol
     const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
     sunLight.position.copy(sun.position);
     sunLight.target.position.set(0, 0, -50);
@@ -448,7 +437,6 @@ function init() {
     scene = new THREE.Scene();
     crearEscenario(scene);
 
-    // Inicializar posición del jugador
     p_pos.set(railXPositions[1], playerHeight / 2, -50);
 
     loadModelAndAnimations();
@@ -459,31 +447,13 @@ function init() {
     cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
     cameraControls.target.set(0, 0, 0);
 
-    // Raycaster helper hacia adelante
-    rayHelper = new THREE.ArrowHelper(
-        new THREE.Vector3(0, 0, -1),
-        new THREE.Vector3(0, 0, 0),
-        5,
-        0xff0000
-    );
-    scene.add(rayHelper);
 
-    // Raycaster helper hacia abajo
-    downRayHelper = new THREE.ArrowHelper(
-        new THREE.Vector3(0, -1, 0),
-        new THREE.Vector3(0, 0, 0),
-        3,
-        0x00ff00
-    );
-    scene.add(downRayHelper);
-
-    // Interfaz dat.GUI simple
     gui = new dat.GUI();
     gui.add(hudData, 'Vidas').listen();
     gui.add(hudData, 'Puntos').listen();
 
-    // Suelo invisible para evitar que el jugador atraviese los raíles
-    const invisibleFloorGeo = new THREE.BoxGeometry(10, 0.5, naveLength); // ancho suficiente para cubrir los 3 raíles
+    // Suelo invisible
+    const invisibleFloorGeo = new THREE.BoxGeometry(10, 0.5, naveLength);
     const invisibleFloorMat = new THREE.MeshBasicMaterial({
         color: 0x00ff00,
         transparent: true,
@@ -564,7 +534,6 @@ function updateAspectRatio() {
 }
 
 function checkGroundCollision() {
-    // Puntos desde los que se lanzarán rayos (centro y esquinas del "pie")
     const offsets = [
         new THREE.Vector3(0, 0, 0),          // centro
         new THREE.Vector3(0.2, 0, 0.2),      // delante derecha
@@ -593,13 +562,10 @@ function checkGroundCollision() {
         }
     }
 
-    // Actualizar helper visual (opcional, solo usa el rayo central)
-    // downRayHelper.position.copy(p_pos);
-    // downRayHelper.setDirection(rayDirection);
+    
 
     if (grounded) {
         if (!enSuelo && velocity.y <= 0) {
-            // Aterrizamos
             p_pos.y = groundY + playerHeight / 2;
             velocity.y = 0;
             enSuelo = true;
@@ -623,7 +589,7 @@ function update() {
 
     if (player == null) return;
 
-    // Aplicar gravedad
+    // gravedad
     if (!enSuelo) {
         velocity.y += gravity;
     }
@@ -641,10 +607,7 @@ function update() {
         enSuelo = true;
     }
 
-    // Interpolación suave entre carriles
     p_pos.x = THREE.MathUtils.lerp(p_pos.x, targetX, 0.15);
-
-    // Actualizar posición del modelo del jugador
     if (player) {
         player.position.copy(p_pos);
     }
@@ -681,7 +644,7 @@ function update() {
 
     generarVagonesPeriodicamente(delta);
 
-    // Generar obstáculos
+    // Generar obstaculos
     tiempoProximoObstaculo -= delta;
     if (tiempoProximoObstaculo <= 0) {
         const cantidad = 1 + Math.floor(Math.random() * 3);
@@ -691,7 +654,7 @@ function update() {
         tiempoProximoObstaculo = 0.6 + Math.random() * 1.2;
     }
 
-    // Mover obstáculos
+    // Mover obstaculos
     obstaculos = obstaculos.filter(o => {
         o.actualizar(delta);
         if (o.fueraDeVista()) {
@@ -703,7 +666,6 @@ function update() {
         return true;
     });
 
-    // Cámara dinámica
     if (cameraMode === "third") {
         const offset = cameraOffset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), angulo);
         const targetPosition = new THREE.Vector3(
@@ -715,19 +677,15 @@ function update() {
         const lookTarget = new THREE.Vector3(p_pos.x, p_pos.y + 1.5, p_pos.z);
         camera.lookAt(lookTarget);
     } else if (cameraMode === "first") {
-        // Alturas objetivo
         const targetHeadY = isCrouching ? crouchHeadY : 1.6;
 
-        // Suavizamos la transición de la altura de la cámara
         cameraHeadY = THREE.MathUtils.lerp(cameraHeadY, targetHeadY, 0.18); // ajustar 0.18 si quieres más/menos suavizado
 
         const lookDistance = 4;
         const lookDir = new THREE.Vector3(Math.sin(angulo), 0, Math.cos(angulo));
 
-        // Posicionamos la cámara en la cabeza (ligero offset hacia atrás)
         camera.position.set(p_pos.x, p_pos.y + cameraHeadY, p_pos.z - 0.5);
 
-        // El punto al que mira también usa la altura suavizada para evitar saltos visuales
         const lookAtPos = new THREE.Vector3(
             p_pos.x + lookDir.x * lookDistance,
             p_pos.y + cameraHeadY,
@@ -737,14 +695,12 @@ function update() {
     }
 
 
-    // Actualizar raycaster hacia adelante
     const rayOrigin = new THREE.Vector3().copy(p_pos);
 
-    // Si está agachado, bajamos el punto de origen del rayo
     if (isCrouching) {
-        rayOrigin.y -= 0.7;  // altura más baja del pecho o cabeza agachada
+        rayOrigin.y -= 0.7; 
     } else {
-        rayOrigin.y += 1.0;  // altura normal
+        rayOrigin.y += 1.0;
     }
 
     const dirForward = new THREE.Vector3(0, 0, -1);
@@ -752,10 +708,9 @@ function update() {
     const dirRight = new THREE.Vector3(1, 0, 0);
 
     function detectarColision(rayo, direccion) {
-        // Ignorar colisiones laterales si el jugador está demasiado bajo (agachado o sobre el vagón)
-        if (direccion.x !== 0) { // Solo aplica a rayos laterales
+        if (direccion.x !== 0) {
             const alturaJugador = p_pos.y;
-            if (alturaJugador < vagonAlto / 2) return; // No detectar si está por debajo de la mitad del vagón
+            if (alturaJugador < vagonAlto / 2) return;
         }
 
         rayo.set(rayOrigin, direccion);
@@ -783,9 +738,6 @@ function update() {
     detectarColision(leftRaycaster, dirLeft);
     detectarColision(rightRaycaster, dirRight);
 
-
-    // Actualizar HUD
-    // Aumentar puntos con el tiempo
     puntos += 100 * delta;
 
     hudData.Vidas = vidas;
@@ -826,7 +778,6 @@ document.getElementById("restartBtn").addEventListener("click", ocultarGameOver)
 let pauseGame = false;
 
 function reiniciarJuego() {
-    // Reinicia variables principales
     vidas = 3;
     puntos = 0;
     p_pos.set(railXPositions[1], playerHeight / 2, -50);
@@ -837,18 +788,15 @@ function reiniciarJuego() {
     currentRail = 1;
     targetX = railXPositions[currentRail];
     
-    // Elimina obstáculos y vagones
     obstaculos.forEach(o => scene.remove(o.mesh));
     obstaculos = [];
     vagones.forEach(v => scene.remove(v));
     vagones = [];
     collidables = collidables.filter(obj => !obj.userData?.isObstacle && !obj.userData?.isVagon);
 
-    // HUD
     hudData.Vidas = vidas;
     hudData.Puntos = 0;
 
-    // Reinicia animación a "run"
     if (mixer && actions[animationNames[A_RUN]]) {
         changeAnimation(A_RUN);
     }
@@ -860,9 +808,9 @@ function render(now) {
     if (!lastFrameTime) lastFrameTime = now;
     const deltaMs = now - lastFrameTime;
 
-    if (deltaMs < frameDuration) return; // aún no toca renderizar el siguiente frame
+    if (deltaMs < frameDuration) return;
 
-    lastFrameTime = now - (deltaMs % frameDuration); // sincroniza para evitar deriva temporal
+    lastFrameTime = now - (deltaMs % frameDuration); 
 
     update();
     renderer.render(scene, camera);
